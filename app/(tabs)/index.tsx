@@ -1,70 +1,109 @@
-import { Image, StyleSheet, Platform } from 'react-native';
+import React from "react";
 
-import { HelloWave } from '@/components/HelloWave';
-import ParallaxScrollView from '@/components/ParallaxScrollView';
-import { ThemedText } from '@/components/ThemedText';
-import { ThemedView } from '@/components/ThemedView';
+import { Text, View, TextInput, StyleSheet, Alert } from "react-native";
+import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
+import { Stack, useRouter } from "expo-router";
+import { useRef } from "react";
 
-export default function HomeScreen() {
+export default function LogIn({navigation}) {
+  const router = useRouter();
+  const auth = getAuth();
+
+  const [value, setValue] = React.useState({
+    email: "",
+    password: "",
+    error: "",
+  });
+
+  async function signIn() {
+    if (value.email === "" || value.password === "") {
+      setValue({
+        ...value,
+        error: "Email and password are mandatory.",
+      });
+      return;
+    }
+
+    try {
+      const response = await signInWithEmailAndPassword(auth, value.email, value.password)
+      console.log(response);
+      navigation.navigate('scan')
+        
+    } catch (error: any) {
+      setValue({
+        ...value,
+        error: error.message,
+      });
+    }
+  }
+
+
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
+    <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+      <View>
+        <Text style={styles.label}>Email</Text>
+        <TextInput
+          placeholder="email"
+          autoCapitalize="none"
+          nativeID="email"
+          value={value.email}
+          onChangeText={(text) => setValue({ ...value, email: text })}
+          style={styles.textInput}
         />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
-        <HelloWave />
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({ ios: 'cmd + d', android: 'cmd + m' })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-        <ThemedText>
-          Tap the Explore tab to learn more about what's included in this starter app.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          When you're ready, run{' '}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
+      </View>
+      <View>
+        <Text style={styles.label}>Password</Text>
+        <TextInput
+          placeholder="password"
+          secureTextEntry={true}
+          nativeID="password"
+          value={value.password}
+          onChangeText={(text) => setValue({ ...value, password: text })}
+          style={styles.textInput}
+        />
+      </View>
+      <Text
+      style={styles.button}
+      onPress={()=>{
+        signIn()
+      }}
+      >
+        Login
+      </Text>
+      <Text
+        onPress={() => {
+ 
+        }}
+      >
+        Create Account
+      </Text>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  titleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
+  label: {
+    marginBottom: 4,
+    color: "#455fff",
   },
-  stepContainer: {
-    gap: 8,
+  textInput: {
+    width: 250,
+    borderWidth: 1,
+    borderRadius: 4,
+    borderColor: "#455fff",
+    paddingHorizontal: 8,
+    paddingVertical: 4,
     marginBottom: 8,
+    backgroundColor:"white"
   },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
-  },
+  button:{
+    backgroundColor: "white",
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 4,
+    borderColor: "#455fff",
+    borderWidth: 1,
+    marginBottom: 8,
+    color: "#455fff",
+  }
 });
